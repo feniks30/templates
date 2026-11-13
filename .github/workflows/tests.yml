@@ -1,0 +1,64 @@
+# Проверка самих шаблонов: на публичном репозитории минуты Actions бесплатны и не ограничены.
+# Если шаблон сломан — это видно сразу, а не через месяц у клиента.
+name: templates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  starter:
+    name: starter
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install --disable-pip-version-check -q pytest
+      - name: Тесты базовки
+        working-directory: starter
+        run: pytest -q
+
+  bot:
+    name: bot-aiogram
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Пакеты
+        working-directory: bot-aiogram
+        run: pip install --disable-pip-version-check -q -r requirements.txt
+      - name: Тесты бота (без Telegram)
+        working-directory: bot-aiogram
+        run: pytest -q
+      - name: Диалог в тренажёре
+        working-directory: bot-aiogram
+        run: python -m bot.simulate --script "Иван|нужен парсер цен конкурента|3 дня|Отправить"
+
+  demo-page:
+    name: demo-page
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Демо-страница без внешних ресурсов
+        run: |
+          f="demo-page/ДЕМО-СТРАНИЦА.html"
+          test -f "$f" || { echo "::error::нет $f"; exit 1; }
+          if grep -qE '<(script|link|img)[^>]+(src|href)="https?://' "$f"; then
+            echo "::error::внешние ресурсы — страница должна открываться офлайн"; exit 1
+          fi
+          grep -q 'name="viewport"' "$f" || { echo "::error::нет meta viewport"; exit 1; }
+          size=$(wc -c < "$f"); echo "вес: $size байт"
+          [ "$size" -lt 122880 ] || { echo "::error::страница больше 120 КБ"; exit 1; }
+          echo "демо-страница: чисто"
