@@ -1,0 +1,26 @@
+# /etc/systemd/system/fh-bot-parser.service
+# Демо-бот заявок: webhook на 127.0.0.1:8081, снаружи — через nginx.
+[Unit]
+Description=FH demo bot: parser
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fhbot
+Group=fhbot
+WorkingDirectory=/opt/fh-bots/parser
+EnvironmentFile=/etc/fh-bots/parser.env
+ExecStart=/opt/fh-bots/parser/.venv/bin/python -m bot.app --webhook
+Restart=always
+RestartSec=3
+# демо-боту нечего писать вне своей папки
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fh-bots/parser/data /var/log/fh-bots
+StandardOutput=append:/var/log/fh-bots/parser.log
+StandardError=append:/var/log/fh-bots/parser.log
+
+[Install]
+WantedBy=multi-user.target

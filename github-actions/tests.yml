@@ -1,0 +1,62 @@
+# Тесты на каждый push: pytest во всех папках заказов.
+# Проверено на приватном репозитории fh-work (GitHub Free): 2 000 минут Linux в месяц бесплатно.
+# Запустить вручную: вкладка Actions → tests → Run workflow (или gh workflow run tests.yml).
+name: tests
+
+on:
+  # push только в main: ветки заказов проверяются через pull_request.
+  # Иначе каждый коммит в ветке даёт два одинаковых запуска (push + PR) — трата минут.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:         # кнопка «Run workflow» — запуск руками
+
+permissions:
+  contents: read             # больше прав не нужно: только читаем код
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10      # чтобы зависший тест не съел бесплатные минуты
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Поставить pytest
+        run: pip install --disable-pip-version-check -q pytest
+
+      - name: Тесты в корне репозитория
+        run: |
+          if [ -d tests ]; then
+            echo "корневые тесты"
+            pytest -q
+          else
+            echo "тестов в корне нет — пропускаю"
+          fi
+
+      - name: Тесты в каждой папке заказа
+        run: |
+          found=0
+          for d in */tests; do
+            [ -d "$d" ] || continue
+            order="$(dirname "$d")"
+            echo "::group::$order"
+            ( cd "$order" && pytest -q ) || exit 1
+            echo "::endgroup::"
+            found=1
+          done
+          if [ "$found" = "0" ]; then
+            echo "папок с тестами нет — пока нечего проверять"
+          fi
+
+      - name: Что проверяли
+        if: always()
+        run: |
+          : "${GITHUB_STEP_SUMMARY:=/dev/null}"
+          echo "### Тесты" >> "$GITHUB_STEP_SUMMARY"
+          echo "- репозиторий: $GITHUB_REPOSITORY" >> "$GITHUB_STEP_SUMMARY"
+          echo "- коммит: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ветка: $GITHUB_REF_NAME" >> "$GITHUB_STEP_SUMMARY"

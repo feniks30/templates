@@ -1,0 +1,86 @@
+# Проверка демо: то, что нельзя доверять «на глаз».
+# Ловит три вещи, из-за которых демо стыдно показывать клиенту:
+#   1) в странице остались незаменённые метки шаблона %%ЗАГОЛОВОК%%;
+#   2) страница тянет внешние файлы (в предпросмотре и офлайне они не загрузятся);
+#   3) страница слишком тяжёлая, чтобы отправить её в переписку.
+# Полная оценка 10 пунктов — локально: python tools/score_demo.py --dir <папка> --live
+# Запустить вручную: Actions → demo-check → Run workflow (или gh workflow run demo-check.yml).
+name: demo-check
+
+on:
+  # push только в main: ветки заказов проверяются через pull_request.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  demos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверить каждое демо
+        shell: bash
+        run: |
+          set -u
+          fail=0
+          found=0
+          for f in */demo/index.html; do
+            [ -f "$f" ] || continue
+            found=1
+            echo "::group::$f"
+
+            # 1. незаменённые метки шаблона
+            if grep -nE '%%[^%]{1,40}%%' "$f"; then
+              echo "::error file=$f::в странице остались метки %%...%% — шаблон не заполнен"
+              fail=1
+            else
+              echo "метки шаблона: чисто"
+            fi
+
+            # 2. внешние ресурсы: в предпросмотре и офлайне не загрузятся
+            if grep -nE '<(script|link|img)[^>]+(src|href)="https?://' "$f"; then
+              echo "::error file=$f::внешние ресурсы — страница должна быть автономной"
+              fail=1
+            else
+              echo "внешние ресурсы: нет"
+            fi
+
+            # 3. вес: больше 120 КБ в переписку не отправить
+            size=$(wc -c < "$f")
+            if [ "$size" -gt 122880 ]; then
+              echo "::error file=$f::страница $size байт (норма до 122880)"
+              fail=1
+            else
+              echo "вес: $size байт"
+            fi
+
+            # 4. мобильный вид: без viewport страница на телефоне выглядит как зум-каша
+            if grep -q 'name="viewport"' "$f"; then
+              echo "viewport: есть"
+            else
+              echo "::warning file=$f::нет meta viewport — телефон покажет не то"
+            fi
+
+            echo "::endgroup::"
+          done
+
+          if [ "$found" = "0" ]; then
+            echo "демо пока нет — проверять нечего"
+          fi
+          exit $fail
+
+      - name: Итог
+        if: always()
+        run: |
+          : "${GITHUB_STEP_SUMMARY:=/dev/null}"
+          echo "### Демо" >> "$GITHUB_STEP_SUMMARY"
+          echo "Проверено: $(ls -d */demo/index.html 2>/dev/null | wc -l) страниц(ы)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Полная оценка 0–10 по 10 пунктам (контраст, пустое состояние, клавиатура, мобильный):" >> "$GITHUB_STEP_SUMMARY"
+          echo '`python tools/score_demo.py --dir <папка> --live`' >> "$GITHUB_STEP_SUMMARY"

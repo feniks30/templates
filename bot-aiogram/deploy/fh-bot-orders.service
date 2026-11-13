@@ -1,0 +1,26 @@
+# /etc/systemd/system/fh-bot-orders.service
+# Демо-бот заявок: webhook на 127.0.0.1:8081, снаружи — через nginx.
+[Unit]
+Description=FH demo bot: orders
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fhbot
+Group=fhbot
+WorkingDirectory=/opt/fh-bots/orders
+EnvironmentFile=/etc/fh-bots/orders.env
+ExecStart=/opt/fh-bots/orders/.venv/bin/python -m bot.app --webhook
+Restart=always
+RestartSec=3
+# демо-боту нечего писать вне своей папки
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fh-bots/orders/data /var/log/fh-bots
+StandardOutput=append:/var/log/fh-bots/orders.log
+StandardError=append:/var/log/fh-bots/orders.log
+
+[Install]
+WantedBy=multi-user.target
