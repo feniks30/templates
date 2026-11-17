@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landing Demo — интерактивный прототип лендинга</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#" class="logo">Demo<span>Site</span></a>
+      <nav class="nav" id="main-nav">
+        <a href="#services">Услуги</a>
+        <a href="#tariffs">Тарифы</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#calculator">Калькулятор</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Открыть меню" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <section class="hero" id="hero">
+    <div class="container hero-inner">
+      <h1>Прототип лендинга без сборки</h1>
+      <p>Чистый HTML/CSS/JS, адаптив, модальное окно заявки и мок-данные. Готовая заготовка под ТЗ клиента.</p>
+      <a href="#contacts" class="btn btn-primary">Оставить заявку</a>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="container">
+      <h2 class="section-title">Услуги</h2>
+      <p class="section-desc">Что мы можем сделать для вашего проекта</p>
+      <div class="card-grid" id="services-grid"></div>
+    </div>
+  </section>
+
+  <section class="section bg-light" id="tariffs">
+    <div class="container">
+      <h2 class="section-title">Тарифы</h2>
+      <p class="section-desc">Прозрачная стоимость без скрытых платежей</p>
+      <div class="card-grid" id="tariffs-grid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="catalog">
+    <div class="container">
+      <h2 class="section-title">Каталог решений</h2>
+      <div class="catalog-controls" role="group" aria-label="Фильтр каталога">
+        <button type="button" class="filter-btn active" data-filter="all">Все</button>
+        <button type="button" class="filter-btn" data-filter="web">Веб-разработка</button>
+        <button type="button" class="filter-btn" data-filter="design">Дизайн</button>
+        <button type="button" class="filter-btn" data-filter="marketing">Маркетинг</button>
+      </div>
+      <div class="card-grid" id="catalog-grid"></div>
+    </div>
+  </section>
+
+  <section class="section bg-light" id="calculator">
+    <div class="container">
+      <h2 class="section-title">Калькулятор стоимости</h2>
+      <div class="calc-wrap">
+        <form id="calculator-form" class="calc-form" novalidate>
+          <div class="calc-field">
+            <label for="calc-type">Тип проекта</label>
+            <select id="calc-type" name="type" required>
+              <option value="landing">Landing-page — 50 000 ₽</option>
+              <option value="corporate">Корпоративный сайт — 150 000 ₽</option>
+              <option value="store">Интернет-магазин — 300 000 ₽</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label for="calc-weeks">Срок, недель</label>
+            <input type="number" id="calc-weeks" name="weeks" value="2" min="1" max="52" required>
+          </div>
+          <div class="calc-field">
+            <label for="calc-urgency">Срочность</label>
+            <select id="calc-urgency" name="urgency" required>
+              <option value="1">Обычный — +0%</option>
+              <option value="1.3">Срочный — +30%</option>
+              <option value="1.6">Экстренный — +60%</option>
+            </select>
+          </div>
+        </form>
+        <div class="calc-result">
+          <div class="calc-result-label">Итоговая стоимость</div>
+          <div class="calc-result-value" id="calc-price">50 000</div>
+          <div class="calc-result-currency">₽</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contacts">
+    <div class="container">
+      <h2 class="section-title">Обратная связь</h2>
+      <form id="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="cf-name">Имя <span class="req">*</span></label>
+            <input type="text" id="cf-name" name="name" required minlength="2">
+            <span class="form-error" id="cf-name-error"></span>
+          </div>
+          <div class="form-field">
+            <label for="cf-email">Email <span class="req">*</span></label>
+            <input type="email" id="cf-email" name="email" required>
+            <span class="form-error" id="cf-email-error"></span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="cf-message">Сообщение <span class="req">*</span></label>
+          <textarea id="cf-message" name="message" required minlength="10"></textarea>
+          <span class="form-error" id="cf-message-error"></span>
+        </div>
+        <button type="submit" class="btn btn-primary" id="cf-submit">Отправить заявку</button>
+      </form>
+      <div id="form-msg" class="form-msg" role="alert"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>&copy; 2026 Demo Site Template. Шаблон прототипа для адаптации под ТЗ клиента.</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="confirm-modal" aria-hidden="true">
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Закрыть">×</button>
+      <h3 id="modal-title">Заявка принята</h3>
+      <p id="modal-text">Спасибо! Мы свяжемся с вами в ближайшее время.</p>
+      <button type="button" class="btn btn-primary" id="modal-ok">Ок</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

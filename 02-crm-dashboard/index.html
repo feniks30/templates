@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Dashboard — панель учёта</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Боковое меню -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">CRM<span>Demo</span></div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-link active" data-section="dashboard">Дашборд</a>
+        <a href="#" class="nav-link" data-section="records">Записи</a>
+        <a href="#" class="nav-link" data-section="settings">Настройки</a>
+      </nav>
+      <div class="sidebar-footer">
+        <small>Версия 1.0</small>
+      </div>
+    </aside>
+
+    <!-- Основное содержимое -->
+    <main class="main">
+      <header class="main-header">
+        <h1 class="main-title">Панель учёта</h1>
+        <div class="main-actions">
+          <button type="button" class="btn btn-primary" id="btn-add">+ Добавить запись</button>
+          <button type="button" class="btn btn-secondary" id="btn-export">Экспорт в CSV</button>
+        </div>
+      </header>
+
+      <!-- Карточки метрик -->
+      <div class="metrics-grid" id="metrics-grid"></div>
+
+      <!-- Панель поиска и фильтров -->
+      <section class="controls">
+        <div class="search-wrap">
+          <label for="inp-search" class="visually-hidden">Поиск записей</label>
+          <input type="search" id="inp-search" placeholder="Поиск по названию и сумме…" aria-label="Поиск записей">
+        </div>
+        <div class="filter-wrap">
+          <label for="inp-status">Статус</label>
+          <select id="inp-status">
+            <option value="">Все статусы</option>
+          </select>
+        </div>
+        <div class="filter-wrap">
+          <label for="inp-date">От даты</label>
+          <input type="date" id="inp-date">
+        </div>
+      </section>
+
+      <!-- Таблица записей -->
+      <section class="table-wrap" id="table-section">
+        <div class="table-container">
+          <table id="records-table">
+            <thead>
+              <tr>
+                <th data-sort="id">ID <span class="sort-hint"></span></th>
+                <th data-sort="title">Название <span class="sort-hint"></span></th>
+                <th data-sort="status">Статус <span class="sort-hint"></span></th>
+                <th data-sort="date">Дата <span class="sort-hint"></span></th>
+                <th data-sort="amount">Сумма <span class="sort-hint"></span></th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="records-tbody"></tbody>
+          </table>
+        </div>
+        <p id="empty-msg" class="empty-msg" style="display:none;">Записей не найдено.</p>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Модальное окно добавления записи -->
+  <div class="modal" id="add-modal" aria-hidden="true">
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Закрыть">×</button>
+      <h3 class="modal-title">Новая запись</h3>
+      <form id="add-form" novalidate>
+        <div class="form-field">
+          <label for="mf-title">Название <span class="req">*</span></label>
+          <input type="text" id="mf-title" name="title" required minlength="2" maxlength="100">
+          <span class="form-error" id="mf-title-error"></span>
+        </div>
+        <div class="form-field">
+          <label for="mf-status">Статус <span class="req">*</span></label>
+          <select id="mf-status" name="status" required>
+            <option value="">Выберите статус</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="mf-date">Дата <span class="req">*</span></label>
+          <input type="date" id="mf-date" name="date" required>
+        </div>
+        <div class="form-field">
+          <label for="mf-amount">Сумма <span class="req">*</span></label>
+          <input type="number" id="mf-amount" name="amount" step="0.01" min="0" required>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="btn-modal-cancel">Отмена</button>
+          <button type="submit" class="btn btn-primary">Создать запись</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
